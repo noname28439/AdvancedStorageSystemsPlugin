@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,6 +19,18 @@ public class Main extends JavaPlugin{
 	public void onEnable() {
 		System.out.println("Advanced Storage enabled!");
 		plugin = this;
+		
+		
+		NamespacedKey key = new NamespacedKey(this, "storage_disc");
+		ShapedRecipe discRecipe = new ShapedRecipe(key, new ItemBuilder(Material.MUSIC_DISC_PIGSTEP, 1).build());
+		discRecipe.shape("RER", "GBG", "RER");
+		discRecipe.setIngredient('E', Material.IRON_BLOCK);
+		discRecipe.setIngredient('R', Material.REDSTONE_BLOCK);
+		discRecipe.setIngredient('G', Material.GOLD_BLOCK);
+		discRecipe.setIngredient('B', Material.LEGACY_BOOK_AND_QUILL);
+		
+		
+		Bukkit.addRecipe(discRecipe);
 		
 		if(plugin.getConfig().isSet("STORAGE_CONTAINERS"))
 		for(String cid : plugin.getConfig().getConfigurationSection("STORAGE_CONTAINERS").getKeys(false)) {

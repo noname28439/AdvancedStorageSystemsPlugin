@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -39,6 +40,14 @@ import net.minecraft.world.item.Items;
 public class InventoryManager implements Listener {
 
 	static HashMap<Integer, ArrayList<ItemStack>> storageCells = new HashMap<>();
+	static HashMap<UUID, Integer> playerScrolls = new HashMap<>();
+	
+	public static int getPlayerScroll(Player p) {
+		if(playerScrolls.containsKey(p.getUniqueId()))
+			return playerScrolls.get(p.getUniqueId());
+		playerScrolls.put(p.getUniqueId(), 0);
+		return 0;
+	}
 	
 	public static int validateBaseBlock(Block toValidate) {
 		if(toValidate.getType() == Material.DISPENSER) {
@@ -107,18 +116,26 @@ public class InventoryManager implements Listener {
 		return removedStack;
 	}
 	
-	public static Inventory openExtractionInventory(int storageCellID) {
+	public static Inventory openExtractionInventory(int storageCellID, int scrolloffset) {
 		
 		Inventory inv = Bukkit.createInventory(null, 6*9, ChatColor.DARK_PURPLE+"Extraction ("+storageCellID+")");
 		//inv.setMaxStackSize(99999);
 		
-		ArrayList<ItemStack> items = storageCells.get(storageCellID);
+		ArrayList<ItemStack> items = (ArrayList<ItemStack>) storageCells.get(storageCellID).clone();
 		items.sort((o1, o2) -> {return o2.getAmount()-o1.getAmount();});
+		
+		for(int i = 0; i<scrolloffset*9; i++) {
+			if(items.size()>0)
+				items.remove(0);
+		}
 		
 		for(ItemStack ciso : items) {
 			ItemStack cis = ciso.clone();
 			inv.addItem(new ItemBuilder(cis).setLore("Amount: "+cis.getAmount()).setAmount(1).build());
 		}
+		
+		inv.setItem(44, new ItemBuilder(Material.LIME_DYE, 1).setDisplayname(ChatColor.DARK_PURPLE+"Up  ("+scrolloffset+")").build());
+		inv.setItem(53, new ItemBuilder(Material.LIGHT_BLUE_DYE, 1).setDisplayname(ChatColor.DARK_PURPLE+"Down ("+scrolloffset+")").build());
 		
 		return inv;
 		
@@ -143,6 +160,20 @@ public class InventoryManager implements Listener {
 			int id = Integer.valueOf(e.getView().getTitle().split(" ")[1].replace("(", "").replace(")", ""));
 			e.setCancelled(true);
 			
+			if(e.getCurrentItem()==null) return;
+			
+			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Up")) {
+				if(playerScrolls.get(p.getUniqueId())>0)
+					playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())-1);
+				p.openInventory(openExtractionInventory(id, getPlayerScroll(p)));
+				return;
+			}
+			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Down")) {
+				if(storageCells.get(id).size()>(playerScrolls.get(p.getUniqueId())+3)*9)
+					playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())+1);
+				p.openInventory(openExtractionInventory(id, getPlayerScroll(p)));
+				return;
+			}	
 			
 			int takeamount = 0;
 			if(e.getClick() == ClickType.LEFT) {
@@ -154,13 +185,11 @@ public class InventoryManager implements Listener {
 			}else if(e.getClick() == ClickType.SHIFT_RIGHT) {
 				takeamount = 16;
 			}
-			if(e.getCurrentItem()!=null) {
-				ItemStack result = consumeItemStackFromStorageCell(id, e.getCurrentItem(), takeamount);
-				//System.out.println("Result: "+result);
-				if(result != null) {
-					p.getInventory().addItem(result);
-					p.openInventory(openExtractionInventory(id));
-				}
+			ItemStack result = consumeItemStackFromStorageCell(id, e.getCurrentItem(), takeamount);
+			//System.out.println("Result: "+result);
+			if(result != null) {
+				p.getInventory().addItem(result);
+				p.openInventory(openExtractionInventory(id, getPlayerScroll(p)));
 			}
 			
 			

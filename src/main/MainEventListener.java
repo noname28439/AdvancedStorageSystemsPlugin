@@ -47,7 +47,7 @@ public class MainEventListener implements Listener {
                         	int id = InventoryManager.validateBaseBlock(after);
                         	if(id!=-1) {
                         		Player p = e.getPlayer();
-                				p.openInventory(InventoryManager.openExtractionInventory(id));
+                				p.openInventory(InventoryManager.openExtractionInventory(id, InventoryManager.getPlayerScroll(p)));
                 				e.setCancelled(true);
                         	}
                         
