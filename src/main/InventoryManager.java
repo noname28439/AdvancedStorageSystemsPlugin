@@ -165,12 +165,22 @@ public class InventoryManager implements Listener {
 			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Up")) {
 				if(playerScrolls.get(p.getUniqueId())>0)
 					playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())-1);
+				if(e.getClick() == ClickType.SHIFT_LEFT) {
+					for(int i = 0; i<5;i++)
+						if(playerScrolls.get(p.getUniqueId())>0)
+							playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())-1);
+				}
 				p.openInventory(openExtractionInventory(id, getPlayerScroll(p)));
 				return;
 			}
 			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Down")) {
 				if(storageCells.get(id).size()>(playerScrolls.get(p.getUniqueId())+3)*9)
 					playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())+1);
+				if(e.getClick() == ClickType.SHIFT_LEFT) {
+					for(int i = 0; i<5;i++)
+						if(storageCells.get(id).size()>(playerScrolls.get(p.getUniqueId())+3)*9)
+							playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())+1);
+				}
 				p.openInventory(openExtractionInventory(id, getPlayerScroll(p)));
 				return;
 			}	
