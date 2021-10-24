@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Sign;
@@ -47,7 +48,8 @@ public class MainEventListener implements Listener {
                         	int id = InventoryManager.validateBaseBlock(after);
                         	if(id!=-1) {
                         		Player p = e.getPlayer();
-                				p.openInventory(InventoryManager.openExtractionInventory(id, InventoryManager.getPlayerScroll(p)));
+                        		p.playSound(p.getLocation(), Sound.BLOCK_IRON_DOOR_OPEN, 1, 1);
+                				p.openInventory(InventoryManager.openExtractionInventory(id, InventoryManager.getPlayerScroll(p), InventoryManager.getPlayerReversion(p)));
                 				e.setCancelled(true);
                         	}
                         
@@ -60,6 +62,7 @@ public class MainEventListener implements Listener {
      				int id = InventoryManager.validateBaseBlock(after);
                 	if(id!=-1) {
                 		Player p = e.getPlayer();
+                		p.playSound(p.getLocation(), Sound.BLOCK_IRON_DOOR_OPEN, 1, 1);
          				p.openInventory(InventoryManager.openInsertionInventory(id));
          				e.setCancelled(true);
                 	}

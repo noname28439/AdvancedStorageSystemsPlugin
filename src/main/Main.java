@@ -1,19 +1,47 @@
 package main;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 
 public class Main extends JavaPlugin{
 
 	public static JavaPlugin plugin;
+	
+	  public static ItemStack createCustomTextureSkull(String url) {
+	        ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
+	        if (url.isEmpty())
+	            return head;
+
+	        SkullMeta headMeta = (SkullMeta) head.getItemMeta();
+	        GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+
+	        profile.getProperties().put("textures", new Property("textures", url));
+
+	        try {
+	            Field profileField = headMeta.getClass().getDeclaredField("profile");
+	            profileField.setAccessible(true);
+	            profileField.set(headMeta, profile);
+
+	        } catch (IllegalArgumentException | NoSuchFieldException | SecurityException | IllegalAccessException error) {
+	            error.printStackTrace();
+	        }
+	        head.setItemMeta(headMeta);
+	        return head;
+	    }
 	
 	@Override
 	public void onEnable() {
@@ -38,7 +66,6 @@ public class Main extends JavaPlugin{
 			int id = Integer.valueOf(cid);
 			InventoryManager.storageCells.put(id, loaded);
 		}
-		
 		
 		PluginManager pm = Bukkit.getPluginManager();
 		pm.registerEvents(new MainEventListener(), this);

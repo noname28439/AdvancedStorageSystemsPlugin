@@ -1,22 +1,15 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,29 +17,28 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.tags.CustomItemTagContainer;
-import org.bukkit.persistence.PersistentDataContainer;
-
-import com.google.common.collect.Multimap;
-
-import net.minecraft.world.item.Items;
 
 
 public class InventoryManager implements Listener {
 
 	static HashMap<Integer, ArrayList<ItemStack>> storageCells = new HashMap<>();
 	static HashMap<UUID, Integer> playerScrolls = new HashMap<>();
+	static HashMap<UUID, Boolean> playerReversions = new HashMap<>();
 	
 	public static int getPlayerScroll(Player p) {
 		if(playerScrolls.containsKey(p.getUniqueId()))
 			return playerScrolls.get(p.getUniqueId());
 		playerScrolls.put(p.getUniqueId(), 0);
 		return 0;
+	}
+	public static boolean getPlayerReversion(Player p) {
+		if(playerReversions.containsKey(p.getUniqueId()))
+			return playerReversions.get(p.getUniqueId());
+		playerReversions.put(p.getUniqueId(), false);
+		return false;
 	}
 	
 	public static int validateBaseBlock(Block toValidate) {
@@ -116,13 +108,16 @@ public class InventoryManager implements Listener {
 		return removedStack;
 	}
 	
-	public static Inventory openExtractionInventory(int storageCellID, int scrolloffset) {
+	public static Inventory openExtractionInventory(int storageCellID, int scrolloffset, boolean reversion) {
 		
 		Inventory inv = Bukkit.createInventory(null, 6*9, ChatColor.DARK_PURPLE+"Extraction ("+storageCellID+")");
 		//inv.setMaxStackSize(99999);
 		
 		ArrayList<ItemStack> items = (ArrayList<ItemStack>) storageCells.get(storageCellID).clone();
-		items.sort((o1, o2) -> {return o2.getAmount()-o1.getAmount();});
+		if(!reversion)
+			items.sort((o1, o2) -> {return o2.getAmount()-o1.getAmount();});
+		else
+			items.sort((o1, o2) -> {return o1.getAmount()-o2.getAmount();});
 		
 		for(int i = 0; i<scrolloffset*9; i++) {
 			if(items.size()>0)
@@ -134,8 +129,20 @@ public class InventoryManager implements Listener {
 			inv.addItem(new ItemBuilder(cis).setLore("Amount: "+cis.getAmount()).setAmount(1).build());
 		}
 		
-		inv.setItem(44, new ItemBuilder(Material.LIME_DYE, 1).setDisplayname(ChatColor.DARK_PURPLE+"Up  ("+scrolloffset+")").build());
-		inv.setItem(53, new ItemBuilder(Material.LIGHT_BLUE_DYE, 1).setDisplayname(ChatColor.DARK_PURPLE+"Down ("+scrolloffset+")").build());
+		for(int i = 45; i<53; i++)
+			inv.setItem(i, new ItemBuilder(Material.WHITE_STAINED_GLASS_PANE, 1).setDisplayname(ChatColor.RED+"x").build());
+		
+		//inv.setItem(44, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNjYmY5ODgzZGQzNTlmZGYyMzg1YzkwYTQ1OWQ3Mzc3NjUzODJlYzQxMTdiMDQ4OTVhYzRkYzRiNjBmYyJ9fX0=")).setDisplayname(ChatColor.DARK_PURPLE+"Up  ("+scrolloffset+")").build());
+		inv.setItem(52, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzI0MzE5MTFmNDE3OGI0ZDJiNDEzYWE3ZjVjNzhhZTQ0NDdmZTkyNDY5NDNjMzFkZjMxMTYzYzBlMDQzZTBkNiJ9fX0=")).setDisplayname(ChatColor.DARK_PURPLE+"Down ("+scrolloffset+")").build());
+		inv.setItem(53, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNjYmY5ODgzZGQzNTlmZGYyMzg1YzkwYTQ1OWQ3Mzc3NjUzODJlYzQxMTdiMDQ4OTVhYzRkYzRiNjBmYyJ9fX0=")).setDisplayname(ChatColor.DARK_PURPLE+"Up  ("+scrolloffset+")").build());
+		inv.setItem(45, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDZiYTYzMzQ0ZjQ5ZGQxYzRmNTQ4OGU5MjZiZjNkOWUyYjI5OTE2YTZjNTBkNjEwYmI0MGE1MjczZGM4YzgyIn19fQ==")).setDisplayname(ChatColor.DARK_PURPLE+"Search").build());
+		//inv.setItem(50, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODQ0OWI5MzE4ZTMzMTU4ZTY0YTQ2YWIwZGUxMjFjM2Q0MDAwMGUzMzMyYzE1NzQ5MzJiM2M4NDlkOGZhMGRjMiJ9fX0=")).setDisplayname(ChatColor.DARK_PURPLE+"Only Blocks").build());
+
+		
+		if(!reversion)
+			inv.setItem(47, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjgyYWQxYjljYjRkZDIxMjU5YzBkNzVhYTMxNWZmMzg5YzNjZWY3NTJiZTM5NDkzMzgxNjRiYWM4NGE5NmUifX19")).setDisplayname(ChatColor.DARK_PURPLE+"Sort left").build());
+		else
+			inv.setItem(47, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzdhZWU5YTc1YmYwZGY3ODk3MTgzMDE1Y2NhMGIyYTdkNzU1YzYzMzg4ZmYwMTc1MmQ1ZjQ0MTlmYzY0NSJ9fX0=")).setDisplayname(ChatColor.DARK_PURPLE+"Sort right").build());
 		
 		return inv;
 		
@@ -163,27 +170,50 @@ public class InventoryManager implements Listener {
 			if(e.getCurrentItem()==null) return;
 			
 			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Up")) {
-				if(playerScrolls.get(p.getUniqueId())>0)
-					playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())-1);
-				if(e.getClick() == ClickType.SHIFT_LEFT) {
+				p.playSound(p.getLocation(), Sound.BLOCK_LEVER_CLICK, 1, 1);
+				if(e.getClick() == ClickType.LEFT) 
+					if(playerScrolls.get(p.getUniqueId())>0)
+						playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())-1);
+				if(e.getClick() == ClickType.SHIFT_LEFT) 
 					for(int i = 0; i<5;i++)
 						if(playerScrolls.get(p.getUniqueId())>0)
 							playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())-1);
-				}
-				p.openInventory(openExtractionInventory(id, getPlayerScroll(p)));
+				if(e.getClick() == ClickType.RIGHT)
+					for(int i = 0; i<50;i++)
+						if(playerScrolls.get(p.getUniqueId())>0)
+							playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())-1);
+				
+				p.openInventory(openExtractionInventory(id, getPlayerScroll(p), getPlayerReversion(p)));
 				return;
 			}
 			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Down")) {
-				if(storageCells.get(id).size()>(playerScrolls.get(p.getUniqueId())+3)*9)
-					playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())+1);
-				if(e.getClick() == ClickType.SHIFT_LEFT) {
+				p.playSound(p.getLocation(), Sound.BLOCK_LEVER_CLICK, 1, 1);
+				if(e.getClick() == ClickType.LEFT)
+					if(storageCells.get(id).size()>(playerScrolls.get(p.getUniqueId())+3)*9)
+						playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())+1);
+				if(e.getClick() == ClickType.SHIFT_LEFT)
 					for(int i = 0; i<5;i++)
 						if(storageCells.get(id).size()>(playerScrolls.get(p.getUniqueId())+3)*9)
 							playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())+1);
-				}
-				p.openInventory(openExtractionInventory(id, getPlayerScroll(p)));
+				if(e.getClick() == ClickType.RIGHT)
+					for(int i = 0; i<50;i++)
+						if(storageCells.get(id).size()>(playerScrolls.get(p.getUniqueId())+3)*9)
+							playerScrolls.put(p.getUniqueId(), playerScrolls.get(p.getUniqueId())+1);
+				
+				p.openInventory(openExtractionInventory(id, getPlayerScroll(p), getPlayerReversion(p)));
 				return;
-			}	
+			}
+			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Sort")) {
+				p.playSound(p.getLocation(), Sound.ITEM_ARMOR_EQUIP_CHAIN, 1, 1);
+				playerReversions.put(p.getUniqueId(), !playerReversions.get(p.getUniqueId()));
+				p.openInventory(openExtractionInventory(id, getPlayerScroll(p), getPlayerReversion(p)));
+			}
+			
+			
+			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Search")) {
+				p.playSound(p.getLocation(), Sound.BLOCK_LEVER_CLICK, 1, 1);
+				p.sendMessage(ChatColor.RED+"Search function under development... ");
+			}
 			
 			int takeamount = 0;
 			if(e.getClick() == ClickType.LEFT) {
@@ -198,8 +228,9 @@ public class InventoryManager implements Listener {
 			ItemStack result = consumeItemStackFromStorageCell(id, e.getCurrentItem(), takeamount);
 			//System.out.println("Result: "+result);
 			if(result != null) {
+				p.playSound(p.getLocation(), Sound.BLOCK_STONE_BUTTON_CLICK_OFF, 1, 1);
 				p.getInventory().addItem(result);
-				p.openInventory(openExtractionInventory(id, getPlayerScroll(p)));
+				p.openInventory(openExtractionInventory(id, getPlayerScroll(p), getPlayerReversion(p)));
 			}
 			
 			
