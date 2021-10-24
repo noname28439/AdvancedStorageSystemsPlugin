@@ -50,7 +50,7 @@ public class Main extends JavaPlugin{
 		
 		
 		NamespacedKey key = new NamespacedKey(this, "storage_disc");
-		ShapedRecipe discRecipe = new ShapedRecipe(key, new ItemBuilder(Material.MUSIC_DISC_PIGSTEP, 1).build());
+		ShapedRecipe discRecipe = new ShapedRecipe(key, new ItemBuilder(Material.MUSIC_DISC_PIGSTEP, 1).setDisplayname("EmptyStorageDisk").build());
 		discRecipe.shape("RER", "GBG", "RER");
 		discRecipe.setIngredient('E', Material.IRON_BLOCK);
 		discRecipe.setIngredient('R', Material.REDSTONE_BLOCK);
