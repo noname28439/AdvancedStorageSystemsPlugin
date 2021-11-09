@@ -2,6 +2,7 @@ package main;
 
 import java.util.ArrayList;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -96,6 +98,40 @@ public class MainEventListener implements Listener {
 	          }
         }
 	}//catch (Exception exc) { Bukkit.broadcastMessage(exc.getLocalizedMessage()); }
+	}
+	
+	
+	@EventHandler
+	public void onHopperMoveItemEvent(InventoryMoveItemEvent e) {
+		//trying to check if inventory is owned by a dispenser but dropper has the same amount of slots
+		if(e.getDestination().getSize()!=9)
+			return;
+		ItemStack storageDisk = e.getDestination().getItem(4);
+		if(storageDisk != null) {
+			if(storageDisk.getType() == Material.MUSIC_DISC_PIGSTEP) {
+				if(!storageDisk.getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"STORAGECELL")) {
+					int nextID = InventoryManager.storageCells.size();
+					System.out.println("Creating Storage Space "+nextID);
+					ItemMeta diskMeta = storageDisk.getItemMeta();
+					diskMeta.setDisplayName(ChatColor.DARK_PURPLE+"STORAGECELL"+nextID);
+					InventoryManager.storageCells.put(nextID, new ArrayList<>());
+					storageDisk.setItemMeta(diskMeta);
+				}
+				
+				int id = Integer.valueOf(storageDisk.getItemMeta().getDisplayName().replace(ChatColor.DARK_PURPLE+"STORAGECELL", ""));
+				if(InventoryManager.storageCells.get(id) == null)
+					InventoryManager.storageCells.put(id, new ArrayList<>());
+				
+				Bukkit.getScheduler().scheduleSyncDelayedTask(Main.plugin, ()->{
+					e.getDestination().remove(e.getItem());
+					InventoryManager.addItemStackToStorageCell(id, e.getItem().clone());
+				});
+				
+				
+				
+				
+			}
+		}
 	}
 	
 }

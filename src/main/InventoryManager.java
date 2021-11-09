@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -136,8 +137,9 @@ public class InventoryManager implements Listener {
 		inv.setItem(52, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzI0MzE5MTFmNDE3OGI0ZDJiNDEzYWE3ZjVjNzhhZTQ0NDdmZTkyNDY5NDNjMzFkZjMxMTYzYzBlMDQzZTBkNiJ9fX0=")).setDisplayname(ChatColor.DARK_PURPLE+"Down ("+scrolloffset+")").build());
 		inv.setItem(53, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNjYmY5ODgzZGQzNTlmZGYyMzg1YzkwYTQ1OWQ3Mzc3NjUzODJlYzQxMTdiMDQ4OTVhYzRkYzRiNjBmYyJ9fX0=")).setDisplayname(ChatColor.DARK_PURPLE+"Up  ("+scrolloffset+")").build());
 		inv.setItem(45, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDZiYTYzMzQ0ZjQ5ZGQxYzRmNTQ4OGU5MjZiZjNkOWUyYjI5OTE2YTZjNTBkNjEwYmI0MGE1MjczZGM4YzgyIn19fQ==")).setDisplayname(ChatColor.DARK_PURPLE+"Search").build());
-		//inv.setItem(50, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODQ0OWI5MzE4ZTMzMTU4ZTY0YTQ2YWIwZGUxMjFjM2Q0MDAwMGUzMzMyYzE1NzQ5MzJiM2M4NDlkOGZhMGRjMiJ9fX0=")).setDisplayname(ChatColor.DARK_PURPLE+"Only Blocks").build());
-
+		inv.setItem(49, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTZjYzQ4NmMyYmUxY2I5ZGZjYjJlNTNkZDlhM2U5YTg4M2JmYWRiMjdjYjk1NmYxODk2ZDYwMmI0MDY3In19fQ==")).setDisplayname(ChatColor.DARK_PURPLE+"Enderchest").build());
+		inv.setItem(50, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmNkYzBmZWI3MDAxZTJjMTBmZDUwNjZlNTAxYjg3ZTNkNjQ3OTMwOTJiODVhNTBjODU2ZDk2MmY4YmU5MmM3OCJ9fX0=")).setDisplayname(ChatColor.DARK_PURPLE+"Crafting Table").build());
+		
 		
 		if(!reversion)
 			inv.setItem(47, new ItemBuilder(Main.createCustomTextureSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjgyYWQxYjljYjRkZDIxMjU5YzBkNzVhYTMxNWZmMzg5YzNjZWY3NTJiZTM5NDkzMzgxNjRiYWM4NGE5NmUifX19")).setDisplayname(ChatColor.DARK_PURPLE+"Sort left").build());
@@ -214,6 +216,17 @@ public class InventoryManager implements Listener {
 				p.playSound(p.getLocation(), Sound.BLOCK_LEVER_CLICK, 1, 1);
 				p.sendMessage(ChatColor.RED+"Search function under development... ");
 			}
+			
+			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Crafting Table")) {
+				p.playSound(p.getLocation(), Sound.BLOCK_LEVER_CLICK, 1, 1);
+				p.openWorkbench(null, true);
+			}
+			
+			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Enderchest")) {
+				p.playSound(p.getLocation(), Sound.BLOCK_LEVER_CLICK, 1, 1);
+				p.openInventory(p.getEnderChest());
+			}
+			
 			
 			int takeamount = 0;
 			if(e.getClick() == ClickType.LEFT) {
