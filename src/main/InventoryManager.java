@@ -94,14 +94,14 @@ public class InventoryManager implements Listener {
 			//System.out.println("checking "+check+" ...");
 			if(check.isSimilar(toRemove)) {
 				//System.out.println("found! --> Amountchecks: "+check.getAmount()+"|"+removeAmount);
-				if(check.getAmount()>=removeAmount) {
-					int nextAmount = check.getAmount()-removeAmount;
-					before.get(entryID).setAmount(nextAmount);
-					removedStack = new ItemBuilder(check).setAmount(removeAmount).build();
-					if(nextAmount<=0)
-						before.remove(entryID);
+				if(check.getAmount()<removeAmount)
+					removeAmount = check.getAmount();
+				int nextAmount = check.getAmount()-removeAmount;
+				before.get(entryID).setAmount(nextAmount);
+				removedStack = new ItemBuilder(check).setAmount(removeAmount).build();
+				if(nextAmount<=0)
+					before.remove(entryID);
 					
-				}
 				
 			}
 		}
@@ -213,6 +213,7 @@ public class InventoryManager implements Listener {
 			
 			
 			if(e.getCurrentItem().getItemMeta().getDisplayName().startsWith(ChatColor.DARK_PURPLE+"Search")) {
+				p.openInventory(openExtractionInventory(id, getPlayerScroll(p), getPlayerReversion(p)));
 				p.playSound(p.getLocation(), Sound.BLOCK_LEVER_CLICK, 1, 1);
 				p.sendMessage(ChatColor.RED+"Search function under development... ");
 			}
