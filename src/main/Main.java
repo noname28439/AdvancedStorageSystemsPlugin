@@ -19,6 +19,8 @@ import com.mojang.authlib.properties.Property;
 
 public class Main extends JavaPlugin{
 
+	
+	
 	public static JavaPlugin plugin;
 	
 	  public static ItemStack createCustomTextureSkull(String url) {

@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
@@ -16,10 +18,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import net.minecraft.world.entity.animal.EntityFox.i;
 
 public class MainEventListener implements Listener {
 
@@ -100,12 +105,34 @@ public class MainEventListener implements Listener {
 	}//catch (Exception exc) { Bukkit.broadcastMessage(exc.getLocalizedMessage()); }
 	}
 	
-	
 	@EventHandler
 	public void onHopperMoveItemEvent(InventoryMoveItemEvent e) {
+		
+		
+		
+		//Item extracted from StorageSystem
+		Location invloc = e.getInitiator().getLocation();
+		if(invloc==null) return;
+		Block initiatiorBlock = invloc.getBlock();
+		if(initiatiorBlock.getType() == Material.DROPPER) {
+			int storageSystemID = InventoryManager.validateBaseBlock(initiatiorBlock.getRelative(0, 1, 0));
+			if(storageSystemID == -1) return;
+			e.setCancelled(true);
+			if(e.getSource().getItem(4) == null) return;
+			ItemStack result = InventoryManager.consumeItemStackFromStorageCell(storageSystemID, e.getSource().getItem(4), 1);
+			if(result==null) {
+				invloc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, invloc.clone().add(0.5, 0.5, 0.5), 10);
+				return;
+			}
+			e.getDestination().addItem(result);
+		}
+		
+		
 		//trying to check if inventory is owned by a dispenser but dropper has the same amount of slots
 		if(e.getDestination().getSize()!=9)
 			return;
+		
+		//Item sorted into StorageSystem
 		ItemStack storageDisk = e.getDestination().getItem(4);
 		if(storageDisk != null) {
 			if(storageDisk.getType() == Material.MUSIC_DISC_PIGSTEP) {
