@@ -17,6 +17,11 @@ You can use the following crafting recipe to gain storagediscs.<br>
 
 (The functions won't work if there is no storagedisc inside of the dispenser)
 
+## Insert / Extract items
+- To insert items, just place a hopper next to the StorageSystem base block and it will suck in the hoppers items.
+- To extract items from the StorageSystem place a dropper under the base block and place the item you want to extract in the middle of the dropper inventory. Then power the dropper and it will throw out the item if the storagesystem currently holds it.
+
+
 ## Installation
 - Download the AdvancedStorageSystems.jar
 - Copy it into the plugins folder of your Minecraft server
