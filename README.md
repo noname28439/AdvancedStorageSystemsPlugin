@@ -11,7 +11,7 @@ You can use the following crafting recipe to gain storagediscs.<br>
 
 ## Building the System
 - place a dispenser and put a storage disc inside
-- click a sign attacked to the dispenser to open the extraction menu
+- click a sign attached to the dispenser to open the extraction menu
 - click an iron trapdoor on top of the dispenser to open the insertion inventory
 - click a tripwirehook attatched to the dispenser with a storagedisc in hand to duplicate the storagedisc inside the dispenser
 
